@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventSync - Your Event Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --primary-color: #6366f1;
+            --secondary-color: #a855f7;
+            --background-dark: #121212;
+            --background-light: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        /* Authentication Styles */
+        
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .auth-card {
+            background-color: var(--background-light);
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .btn {
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        /* Main App Styles */
+        
+        .main-app {
+            background-color: var(--background-dark);
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background-color: var(--background-light);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .events-section {
+            padding: 2rem;
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .event-card {
+            background-color: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .event-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="authContainer" class="auth-container">
+        <div class="auth-card">
+            <div id="loginForm" class="auth-form">
+                <h2>Welcome to EventSync</h2>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button class="btn" onclick="handleLogin(event)">Sign In</button>
+                <p class="text-center">Don't have an account? <a href="#" onclick="toggleAuthMode()">Register</a></p>
+            </div>
+
+            <div id="registerForm" class="auth-form" style="display:none;">
+                <h2>Create Your Account</h2>
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="email" id="registerEmail" placeholder="Email" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <button class="btn" onclick="handleRegister(event)">Sign Up</button>
+                <p class="text-center">Already have an account? <a href="#" onclick="toggleAuthMode()">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="main-app" style="display:none;">
+        <div class="app-header">
+            <h1>EventSync</h1>
+            <button class="btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="events-section">
+            <div class="container">
+                <h2>Create New Event</h2>
+                <form id="createEventForm" class="auth-form">
+                    <input type="text" id="eventName" placeholder="Event Name" required>
+                    <input type="datetime-local" id="eventDateTime" required>
+                    <textarea id="eventDescription" placeholder="Event Description" rows="3" required></textarea>
+                    <button type="submit" class="btn" onclick="handleCreateEvent(event)">Create Event</button>
+                </form>
+
+                <div class="events-grid" id="eventsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        // State management
+        let currentUser = null;
+        let events = [];
+
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.getElementById('toastContainer').appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function toggleAuthMode() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (loginForm.style.display !== 'none') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'flex';
+            } else {
+                loginForm.style.display = 'flex';
+                registerForm.style.display = 'none';
+            }
+        }
+
+        // Authentication Functions
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data;
+                    localStorage.setItem('user', JSON.stringify(data));
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    fetchEvents();
+                    showToast('Login successful!');
+                } else {
+                    showToast('Login failed. Please check your credentials.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
+                    }),
+                });
+
+                if (response.ok) {
+                    showToast('Registration successful! Please login.');
+                    toggleAuthMode();
+                } else {
+                    showToast('Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('user');
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('authContainer').style.display = 'flex';
+            showToast('Logged out successfully!');
+        }
+
+        // Event Management Functions
+        async function handleCreateEvent(event) {
+            event.preventDefault();
+            const eventName = document.getElementById('eventName').value;
+            const eventDateTime = document.getElementById('eventDateTime').value;
+            const eventDescription = document.getElementById('eventDescription').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/events/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${currentUser.token}`,
+                    },
+                    body: JSON.stringify({
+                        event_name: eventName,
+                        event_datetime: eventDateTime,
+                        event_description: eventDescription,
+                    }),
+                });
+
+                if (response.ok) {
+                    showToast('Event created successfully!');
+                    event.target.reset();
+                    fetchEvents();
+                } else {
+                    showToast('Failed to create event. Please try again.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        async function fetchEvents() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/events', {
+                    headers: {
+                        'Authorization': `Token ${currentUser.token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    events = await response.json();
+                    renderEvents();
+                }
+            } catch (error) {
+                showToast('Failed to fetch events.', 'error');
+            }
+        }
+
+        async function deleteEvent(id) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/events/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Token ${currentUser.token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    showToast('Event deleted successfully!');
+                    fetchEvents();
+                } else {
+                    showToast('Failed to delete event.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        function renderEvents() {
+            const eventsContainer = document.getElementById('eventsList');
+            eventsContainer.innerHTML = '';
+
+            events.forEach(event => {
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+                eventCard.innerHTML = `
+                    <h3>${event.event_name}</h3>
+                    <p>${new Date(event.event_datetime).toLocaleString()}</p>
+                    <p>${event.event_description}</p>
+                    <div class="event-actions">
+                        <button class="btn" onclick="deleteEvent(${event.id})">Delete</button>
+                    </div>
+                `;
+                eventsContainer.appendChild(eventCard);
+            });
+        }
+
+        // Check for saved user on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                fetchEvents();
+            }
+        });
+    </script>
+</body>
+
+</html>
